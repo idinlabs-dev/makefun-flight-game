@@ -35,8 +35,13 @@ function handIn() {
   if (shots.length < 3 || shots.length > 4) {
     throw new Error("screenshots/ must hold 3-4 images, found " + shots.length);
   }
-  rmSync(OUT, { recursive: true, force: true });
+  // Never delete OUT itself: in the grader /output is a Docker bind-mount
+  // (user 65534, read-only root) — rmdir of the mount point fails EBUSY
+  // and recreating it is impossible. Clear only its contents instead.
   mkdirSync(OUT, { recursive: true });
+  for (const name of readdirSync(OUT)) {
+    rmSync(join(OUT, name), { recursive: true, force: true });
+  }
   cpSync(gameDir, join(OUT, "game"), { recursive: true });
   cpSync(shotsDir, join(OUT, "screenshots"), { recursive: true });
   const dossier = buildDossier(OUT, { text_max_bytes: TEXT_MAX_BYTES });
