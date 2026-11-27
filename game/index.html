@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dead Stick — engine out, glide it home</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #10142a; height: 100%; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, sans-serif;
+  }
+  #wrap { width: min(100vw, calc(100vh * 16 / 9)); }
+  canvas {
+    display: block; width: 100%; height: auto;
+    background: #1b2a52; cursor: pointer;
+    image-rendering: auto;
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" width="960" height="540"></canvas></div>
+<script src="src/config.js"></script>
+<script src="src/random.js"></script>
+<script src="src/physics.js"></script>
+<script src="src/levels.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/input.js"></script>
+<script src="src/render.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
