@@ -49,3 +49,25 @@ Round-2 findings and fixes (all in this session):
   runs produce identical output.
 - Live play test (CDP, real key presses): level 1 starts on "1",
   plane flies with pitch input, zero JS errors in all modes.
+
+## Round-3 fix (27 Nov 2026, after submission 01a21bab rejected at grading)
+
+- Failure: check `run_completes` failed — the grader ran `node /bot/main.ts`
+  and it exited with code 1, while the same program exited 0 locally.
+- Diagnosis: main.ts did `rmSync(OUT, { recursive: true, force: true })`
+  where OUT is /output (or $MAKEFUN_OUTPUT_DIR). In the grader /output is
+  a Docker bind-mount on a read-only root filesystem, run as user 65534:
+  recursive rm tries to rmdir the mount point itself (EBUSY), and
+  recreating it would hit the read-only root — uncaught throw, exit 1.
+  Locally /output is a plain directory, so it passed. Corroboration: the
+  three entries that passed grading (Turkey, Budget, National Stats)
+  have no rmSync of OUT in their main.ts; this one did.
+- Fix (main.ts only): never delete OUT itself. mkdirSync(OUT) first, then
+  delete only its contents (readdirSync + rmSync per entry). Everything
+  else unchanged: game/ + screenshots/ copy, dossier written as raw
+  Uint8Array bytes, summary log lines, --serve mode untouched.
+- Tests: (1) fresh out dir via MAKEFUN_OUTPUT_DIR → exit 0, dossier
+  written, game/ + screenshots/ copied; (2) pre-seeded stale file and
+  stale dir → both removed, fresh output correct; (3) two runs →
+  byte-identical dossier (sha256 62227f2f…); (4) `node main.ts --serve`
+  still serves game/ on localhost:8080 (HTTP 200).
